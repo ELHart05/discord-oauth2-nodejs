@@ -9,6 +9,7 @@ const verifyAuth = async (req, res, next) => {
 
         if (!token) {
             req.user = null;
+            await next();
             return;
         }
         
@@ -18,6 +19,8 @@ const verifyAuth = async (req, res, next) => {
 
         req.user = currentUser;
 
+        await next();
+
     } catch (err) {
 
         req.user = null;
@@ -25,8 +28,6 @@ const verifyAuth = async (req, res, next) => {
         next(err);
         
     }
-
-    await next();
 }
 
 module.exports = verifyAuth;
