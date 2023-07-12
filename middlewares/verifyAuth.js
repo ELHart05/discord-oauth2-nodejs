@@ -7,8 +7,18 @@ const verifyAuth = async (req, res, next) => {
 
     try {
 
+        if (token === "Denied") {
+            req.user = {
+                discordID: "Denied"
+            };
+            await next();
+            return;  
+        }
+
         if (!token) {
-            req.user = null;
+            req.user = {
+                discordID: -1
+            };
             await next();
             return;
         }
@@ -23,7 +33,9 @@ const verifyAuth = async (req, res, next) => {
 
     } catch (err) {
 
-        req.user = null;
+        req.user = {
+            discordID: "error"
+        };
     
         next(err);
         

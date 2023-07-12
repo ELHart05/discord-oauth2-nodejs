@@ -19,10 +19,10 @@ const app = express();
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
-
-/*verify auth middleware*/
-app.use(verifyAuth);
+app.use(cors({
+    credentials: true,
+    origin: "https://spa.earthmeta.ai"
+  }));
 
 /*routes usage*/
 app.use('/auth/discord', discordUserRoutes);

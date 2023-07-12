@@ -8,12 +8,14 @@ const discordAuthLogin = async (req, res) => {
 } 
 
 const discordAuthCallback = async (req, res, next) => {
-    const { code, error, error_description } = req.query;
+    const { code, error } = req.query;
 
     try {
 
         if (error) {
-            throw new Error(error_description);
+            res.cookie('token', "Denied");
+            res.redirect(`${process.env.DISCORD_FINAL_REDIRECT}`);
+            return;
         }
     
         let userData = {};
@@ -77,12 +79,12 @@ const discordAuthCallback = async (req, res, next) => {
         }
 
         const token = await jwt.sign({sub: id}, process.env.JWT_SECRET_KEY, {
-            expiresIn: '1d'
+            expiresIn: '7d'
         })
 
-        res.cookie('token', token);
+        res.cookie('token', token, {  });
 
-        res.redirect(`${process.env.DISCORD_FINAL_REDIRECT}`)
+        res.redirect(`${process.env.DISCORD_FINAL_REDIRECT}`);
 
     } catch (error) {
         next(error, 500);
@@ -90,13 +92,7 @@ const discordAuthCallback = async (req, res, next) => {
 }
 
 const discordAuthMe = async (req, res, next) => {
-    if (req.user === null) {
-        res.status(500).send({
-            error: "error"
-        })
-    }   else {
-        res.status(200).send(req.user);
-    }
+    res.status(200).send(req.user);
 }
 
 const discordAuthGetall = async (req, res, next) => {
