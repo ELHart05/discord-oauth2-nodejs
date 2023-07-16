@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const DiscordUser = require("../models/DiscordUser");
 
+
+//middleware removed due to the issue of cannot send cookie to another domain
 const verifyAuth = async (req, res, next) => {
     
     const token = req.cookies.token;

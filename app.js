@@ -10,9 +10,12 @@ dotenvExpand.expand(myEnv);
 
 /*import files*/
 const discordUserRoutes = require('./routes/DiscordUserRoutes');
+const telegramUserRoutes = require('./routes/TelegramUserRoutes');
+const facebookUserRoutes = require('./routes/FacebookUserRoutes');
 /*import middleware*/
 const handleError = require("./middlewares/handleError");
-const verifyAuth = require("./middlewares/verifyAuth");
+//import telegram triggers
+const { triggerGroupId, triggerNewMember, triggerLeftMember } = require("./telegramBot");
 /*start the app instance*/
 const app = express();
 
@@ -22,12 +25,15 @@ app.use(express.json());
 app.use(cors({
     credentials: true,
     origin: "https://spa.earthmeta.ai"
-  }));
+})); 
 
 /*routes usage*/
+app.use('/auth/facebook', facebookUserRoutes);
+app.use('/auth/telegram', telegramUserRoutes);
 app.use('/auth/discord', discordUserRoutes);
+app.use('*', (req, res) => res.send("Invalid Route"));
 
-/*connect to db and listen to requests on api*/
+/*connect to db and listen to requests*/
 mongoose.connect(process.env.DB_URI)
 .then(() => {
     app.listen(process.env.PORT, () => {

@@ -1,6 +1,9 @@
 const axios = require("axios");
 const DiscordUser = require("../models/DiscordUser");
 const jwt = require("jsonwebtoken");
+const AppError = require("../utils/AppError");
+
+let currentToken = ""; //local var to have the last user authed token
 
 const discordAuthLogin = async (req, res) => {
     const url = "https://discord.com/api/oauth2/authorize?client_id=1127227664302870538&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fauth%2Fdiscord%2Fcallback&response_type=code&scope=identify%20guilds%20email%20guilds.join";
@@ -13,7 +16,10 @@ const discordAuthCallback = async (req, res, next) => {
     try {
 
         if (error) {
+            //since cookie not working issue we will used local var to affect the cookie and the time we get to the front we get the local var contains token we decode it and fetch the user
+            //note that I left the cookie in with the middleware commented in case in future maintain
             res.cookie('token', "Denied");
+            currentToken = "Denied";
             res.redirect(`${process.env.DISCORD_FINAL_REDIRECT}`);
             return;
         }
@@ -64,7 +70,7 @@ const discordAuthCallback = async (req, res, next) => {
                 ))
             });
 
-            res.status(201);
+            res.status(200);
         } else {
             const newUser = new DiscordUser({
                 username, avatar,
@@ -75,24 +81,57 @@ const discordAuthCallback = async (req, res, next) => {
             });
     
             result = await newUser.save();
-            res.status(200);
+            res.status(201);
         }
 
         const token = await jwt.sign({sub: id}, process.env.JWT_SECRET_KEY, {
             expiresIn: '7d'
         })
 
-        res.cookie('token', token, {  });
+        res.cookie("token", token);
+
+        currentToken = token;
 
         res.redirect(`${process.env.DISCORD_FINAL_REDIRECT}`);
 
     } catch (error) {
-        next(error, 500);
+        next(error);
     }
 }
 
+
 const discordAuthMe = async (req, res, next) => {
-    res.status(200).send(req.user);
+    try {
+        
+        if (currentToken === "Denied") {
+            return res.status(200).send({
+                discordID: "Denied"
+            });
+        }
+
+        if (!currentToken) {
+            return res.status(200).send({
+                discordID: -1
+            });
+        }
+        
+        const { sub } = await jwt.verify(currentToken, process.env.JWT_SECRET_KEY);
+
+        const currentUser = await DiscordUser.findOne({ discordID: sub });
+
+        if (!currentUser) {
+            return res.status(200).send({
+                discordID: -1
+            });
+        }
+
+        res.status(200).send(currentUser);
+
+        currentToken = "";
+
+    } catch (err) {
+        next(err);
+    }
 }
 
 const discordAuthGetall = async (req, res, next) => {
@@ -110,6 +149,6 @@ const discordAuthGetall = async (req, res, next) => {
 module.exports = {
     discordAuthLogin,
     discordAuthCallback,
-    discordAuthMe,
-    discordAuthGetall
+    discordAuthGetall,
+    discordAuthMe
 }
