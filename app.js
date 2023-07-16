@@ -33,11 +33,12 @@ app.use('/auth/telegram', telegramUserRoutes);
 app.use('/auth/discord', discordUserRoutes);
 app.use('*', (req, res) => res.send("Invalid Route"));
 
+
 /*connect to db and listen to requests*/
 mongoose.connect(process.env.DB_URI)
 .then(() => {
-    app.listen(process.env.PORT, () => {
-        console.log(`connected to db & start listening on port ${process.env.PORT}`);
+    app.listen(process.env.PORT || 4000, () => {
+        console.log(`connected to db & start listening on port ${process.env.PORT || 4000}`);
     })})
 .catch((err) => {
     console.log(err.message);
