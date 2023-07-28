@@ -18,7 +18,7 @@ const DiscordUserSchema = new Schema({
     },
     joinedEarthMeta: {
         type: Boolean,
-        default: false
+        default: true
     },
     tookReward: {
         type: Boolean,
