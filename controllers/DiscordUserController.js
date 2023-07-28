@@ -2,12 +2,13 @@ const axios = require("axios");
 const DiscordUser = require("../models/DiscordUser");
 const jwt = require("jsonwebtoken");
 const AppError = require("../utils/AppError");
+require("dotenv").config()
 
 let currentToken = ""; //local var to have the last user authed token
 let currentUser = ""; //local user to have the last user authed token
 
 const discordAuthLogin = async (req, res) => {
-    const url = "https://discord.com/api/oauth2/authorize?client_id=1127227664302870538&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fauth%2Fdiscord%2Fcallback&response_type=code&scope=identify%20guilds%20email%20guilds.join";
+    const url = process.env.DISCORD_CLIENT_FIRST_CALLBACK;
     res.redirect(url);
 } 
 
