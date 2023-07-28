@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const AppError = require("../utils/AppError");
 
 let currentToken = ""; //local var to have the last user authed token
+let currentUser = ""; //local user to have the last user authed token
 
 const discordAuthLogin = async (req, res) => {
     const url = "https://discord.com/api/oauth2/authorize?client_id=1127227664302870538&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fauth%2Fdiscord%2Fcallback&response_type=code&scope=identify%20guilds%20email%20guilds.join";
@@ -84,7 +85,7 @@ const discordAuthCallback = async (req, res, next) => {
             res.status(201);
         }
 
-        const token = await jwt.sign({sub: id}, process.env.JWT_SECRET_KEY, {
+        const token = await jwt.sign({discordID: id}, process.env.JWT_SECRET_KEY, {
             expiresIn: '7d'
         })
 
@@ -102,32 +103,50 @@ const discordAuthCallback = async (req, res, next) => {
 
 const discordAuthMe = async (req, res, next) => {
     try {
-        
-        if (currentToken === "Denied") {
-            return res.status(200).send({
-                discordID: "Denied"
-            });
+
+        if (!currentToken || currentToken === "Denied") {
+            throw new AppError("User not founded", 404);
         }
 
-        if (!currentToken) {
-            return res.status(200).send({
-                discordID: -1
-            });
-        }
         
-        const { sub } = await jwt.verify(currentToken, process.env.JWT_SECRET_KEY);
-
-        const currentUser = await DiscordUser.findOne({ discordID: sub });
+        const { discordID } = await jwt.verify(currentToken, process.env.JWT_SECRET_KEY);
+        currentUser = await DiscordUser.findOne({ discordID });
 
         if (!currentUser) {
-            return res.status(200).send({
-                discordID: -1
-            });
+            throw new AppError("User not founded", 404);
         }
 
-        res.status(200).send(currentUser);
+        if (currentUser.tookReward) {
+            throw new AppError("User already claimed reward", 400);
+        }
+
+        if (!currentUser.joinedEarthMeta) {
+            throw new AppError("User hasn't joined Earthmeta server yet...", 400);
+        }
+
+        res.status(200).send({ discordID });
 
         currentToken = "";
+
+    } catch (err) {
+        next(err);
+    }
+}
+
+const discordUpdateAuthMe = async (req, res, next) => {
+    try {
+        
+        if (!currentUser) {
+            throw new AppError("User not found", 404);
+        }
+
+        await DiscordUser.findOneAndUpdate({discordID: currentUser.discordID}, {
+            tookReward: true
+        })
+
+        res.status(204).end();
+
+        currentUser = "";
 
     } catch (err) {
         next(err);
@@ -150,5 +169,6 @@ module.exports = {
     discordAuthLogin,
     discordAuthCallback,
     discordAuthGetall,
-    discordAuthMe
+    discordAuthMe,
+    discordUpdateAuthMe
 }

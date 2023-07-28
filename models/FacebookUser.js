@@ -2,22 +2,19 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const DiscordUserSchema = new Schema({
-    discordID: {
+const FacebookUserSchema = new Schema({
+    facebookID: {
         type: String,
         required: true,
         unique: true
     }, 
-    username: {
+    displayName: {
         type: String,
         required: true,
-        unique: true
     },
-    avatar: {
-        type: String
-    },
-    joinedEarthMeta: {
+    likedEM: {
         type: Boolean,
+        required: true,
         default: false
     },
     tookReward: {
@@ -26,6 +23,6 @@ const DiscordUserSchema = new Schema({
     }
 }, { timestamps: true })
 
-const DiscordUser = mongoose.model('DiscordUsers', DiscordUserSchema);
+const FacebookUser = mongoose.model('FacebookUsers', FacebookUserSchema);
 
-module.exports = DiscordUser;
+module.exports = FacebookUser;

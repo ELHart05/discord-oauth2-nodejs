@@ -8,13 +8,16 @@ const TelegramUserSchema = new Schema({
         unique: true
     },
     firstName: {
-        type: String,
-        required: false
+        type: String
     },
     username: {
         type: String,
         required: true,
         unique: true
+    },
+    tookReward: {
+        type: Boolean,
+        default: false
     }
 })
 
