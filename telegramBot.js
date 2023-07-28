@@ -42,6 +42,18 @@ const triggerNewMember = bot.on('new_chat_members', async (msg) => {
   
 }});
 
+const triggerLeftMember = bot.on('left_chat_member', async (msg) => {
+
+  const { id, is_bot } = msg.left_chat_member; //change 
+
+  if (!is_bot) {
+    await TelegramUser.findOneAndUpdate({ telegramID: id }, {
+      joinedEM: false
+    })
+  }
+  // bot.sendMessage(msg.chat.id, `User ${username} (ID: ${id}) left or was removed from the group chat.`); just in test mode
+});
+
 module.exports = {
-  triggerGroupId, triggerNewMember
+  triggerGroupId, triggerNewMember, triggerLeftMember
 }

@@ -18,6 +18,10 @@ const TelegramUserSchema = new Schema({
     tookReward: {
         type: Boolean,
         default: false
+    },
+    joinedEM: {
+        type: Boolean,
+        default: true
     }
 })
 
