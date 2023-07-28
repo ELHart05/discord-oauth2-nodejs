@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const axios = require("axios");
 const session = require('express-session');
+const MemoryStore = require('memorystore')(session)
 const passport = require("passport");
 const FacebookUser = require("../models/FacebookUser");
 const FacebookStrategy = require("passport-facebook").Strategy;
@@ -10,7 +11,15 @@ require("dotenv").config();
 const router = Router();
 
 //passport js implement
-router.use(session({ secret: process.env.FACEBOOK_SESSION_SECRET, resave: false, saveUninitialized: false, cookie: { maxAge: 5 * 60 * 1000 } })); //the user has only 5 minuites to verify before the session ends
+router.use(session({ 
+  secret: process.env.FACEBOOK_SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: new MemoryStore({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  }),
+  cookie: { maxAge: 5 * 60 * 1000 } 
+})); //the user has only 5 minuites to verify before the session ends
 
 router.use(passport.initialize());
 router.use(passport.session());
