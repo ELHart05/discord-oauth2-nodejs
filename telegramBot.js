@@ -6,15 +6,6 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 let groupChatId = process.env.TELEGRAM_GROUP_ID;
 
-
-
-if(bot.isPolling()) {
-  await bot.stopPolling();
-}
-
-await bot.startPolling();
-
-
 //send to the bot "/getGroupId" on the group chat in case don't have the group chatId
 const triggerGroupId = bot.onText(/\/getGroupId/, (msg) => {
   groupChatId = msg.chat.id;
@@ -50,8 +41,6 @@ const triggerNewMember = bot.on('new_chat_members', async (msg) => {
   bot.sendMessage(msg.chat.id, `Congratulations! ${first_name} has joined the group chat`);
   
 }});
-
-await bot.stopPolling();
 
 module.exports = {
   triggerGroupId, triggerNewMember
