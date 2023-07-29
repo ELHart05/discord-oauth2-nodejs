@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
 const dotenvExpand = require('dotenv-expand');
+const { sign } = require("jsonwebtoken");
 const env = require("dotenv");
 const myEnv = env.config();
 dotenvExpand.expand(myEnv);
@@ -27,12 +28,17 @@ app.use(cors({
     origin: "https://spa.earthmeta.ai"
 })); 
 
+app.post('/auth/gettoken', (req, res) => {
+    const { task } = req.body;
+    const token = sign({task}, process.env.JWT_SECRET_KEY, {expiresIn: "60000"})
+    res.status(200).send({token});
+})
+
 /*routes usage*/
 app.use('/auth/facebook', facebookUserRoutes);
 app.use('/auth/telegram', telegramUserRoutes);
 app.use('/auth/discord', discordUserRoutes);
 app.use('*', (req, res) => res.send("Invalid Route"));
-
 
 /*connect to db and listen to requests*/
 mongoose.connect(process.env.DB_URI)
