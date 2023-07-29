@@ -26,7 +26,7 @@ const triggerNewMember = bot.on('new_chat_members', async (msg) => {
     await TelegramUser.findOneAndUpdate({ telegramID: id }, {
       telegramID: id,
       firstName: first_name,
-      username: username ?? "undefined", //there's some users without username, if no username then null,
+      username: username ?? "undefined", //there's some users without username, if no username then null
       joinedEM: true
     })
   } else {

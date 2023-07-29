@@ -8,21 +8,21 @@ const facebookAuthMe = async (req, res, next) => {
       throw new AppError("Authenticate with your account to verify...", 400);
     }
 
-    const fbUser = await FacebookUser.findOne({ facebookID: req.user.id });
+    const fbUser = await FacebookUser.findOne({ facebookID: req.user.facebookID });
 
     if (!fbUser) {
       throw new AppError("User not found", 404);
     }
 
     if (!fbUser.likedEM) {
-      throw new AppError("User didn't liked EarthMeta page...", 400);
+      throw new AppError("User didn't like EarthMeta page...", 400);
     }
 
     if (fbUser.tookReward) {
       throw new AppError("Already took reward...", 400);
     }
 
-    res.status(200).send({id: fbUser.id})
+    res.status(200).send({id: fbUser.facebookID})
 
   } catch (err) {
     next(err);

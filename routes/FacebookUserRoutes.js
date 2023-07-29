@@ -52,8 +52,7 @@ passport.use(new FacebookStrategy({
     })
     await newUser.save();
   }
-  
-  return done(null, {...profile, likedEM});
+  return done(null, {...newUser._doc});
 }));
 
 
