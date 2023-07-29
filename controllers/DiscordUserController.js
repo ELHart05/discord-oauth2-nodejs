@@ -19,7 +19,7 @@ const discordAuthCallback = async (req, res, next) => {
 
         if (error) {
             //since cookie not working issue we will used local var to affect the cookie and the time we get to the front we get the local var contains token we decode it and fetch the user
-            //note that I left the cookie in with the middleware commented in case in future maintain
+            //note that I left the cookie in with the middleware commented in case of future maintainance
             res.cookie('token', "Denied");
             currentToken = "Denied";
             res.redirect(`${process.env.DISCORD_FINAL_REDIRECT}`);
@@ -154,22 +154,23 @@ const discordUpdateAuthMe = async (req, res, next) => {
     }
 }
 
-const discordAuthGetall = async (req, res, next) => {
-    try {
+//get all users (test only)
+// const discordAuthGetall = async (req, res, next) => {
+//     try {
         
-        const allAuths = await DiscordUser.find();
+//         const allAuths = await DiscordUser.find();
 
-        res.status(200).send(allAuths)
+//         res.status(200).send(allAuths)
 
-    } catch (err) {
-        next(err);
-    }
-}
+//     } catch (err) {
+//         next(err);
+//     }
+// }
 
 module.exports = {
     discordAuthLogin,
     discordAuthCallback,
-    discordAuthGetall,
+    // discordAuthGetall,
     discordAuthMe,
     discordUpdateAuthMe
 }

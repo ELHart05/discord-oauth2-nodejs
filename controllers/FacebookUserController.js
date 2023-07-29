@@ -47,17 +47,21 @@ const facebookAuthUpdateMe = async (req, res, next) => {
   }
 }
 
-
-const facebookAuthAll = async (req, res, next) => {
-  try {
+//test purpose only
+// const facebookAuthAll = async (req, res, next) => {
+//   try {
       
-      const allAuths = await FacebookUser.find({});
+//       const allAuths = await FacebookUser.find({});
 
-      res.status(200).send(allAuths)
+//       res.status(200).send(allAuths)
 
-  } catch (err) {
-      next(err);
-  }
+//   } catch (err) {
+//       next(err);
+//   }
+// }
+
+module.exports = {
+  facebookAuthMe,
+  // facebookAuthAll,
+  facebookAuthUpdateMe
 }
-
-  module.exports = { facebookAuthMe, facebookAuthAll, facebookAuthUpdateMe }

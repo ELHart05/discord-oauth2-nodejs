@@ -5,7 +5,11 @@ const MemoryStore = require('memorystore')(session)
 const passport = require("passport");
 const FacebookUser = require("../models/FacebookUser");
 const FacebookStrategy = require("passport-facebook").Strategy;
-const { facebookAuthMe, facebookAuthAll, facebookAuthUpdateMe } = require("../controllers/FacebookUserController")
+const {
+  facebookAuthMe,
+  // facebookAuthAll,
+  facebookAuthUpdateMe
+} = require("../controllers/FacebookUserController")
 require("dotenv").config();
 
 const router = Router();
@@ -77,6 +81,6 @@ router.get('/me', facebookAuthMe);
 
 router.patch('/me', facebookAuthUpdateMe);
 
-router.get('/', facebookAuthAll);
+// router.get('/', facebookAuthAll);
 
 module.exports = router;

@@ -1,5 +1,9 @@
 const { Router } = require("express");
-const { discordAuthLogin, discordAuthCallback, discordAuthGetall, discordAuthMe, discordUpdateAuthMe } = require("../controllers/DiscordUserController");
+const { discordAuthLogin,
+    discordAuthCallback,
+    discordAuthMe,
+    // discordAuthGetall,
+    discordUpdateAuthMe } = require("../controllers/DiscordUserController");
 
 const router = Router();
 
@@ -15,6 +19,6 @@ router.get('/me', discordAuthMe);
 router.patch('/me', discordUpdateAuthMe);
 
 /* used to get all users guaranteed auth */
-router.get('/', discordAuthGetall);
+// router.get('/', discordAuthGetall);
 
 module.exports = router;
