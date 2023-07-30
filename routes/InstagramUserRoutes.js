@@ -29,29 +29,26 @@ router.use(passport.session());
 passport.use(new InstagramStrategy({
   clientID: process.env.INSTAGRAM_CLIENT_ID,
   clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
-  callbackURL: process.env.INSTAGRAM_FINAL_REDIRECT,
+  callbackURL: process.env.INSTAGRAM_CLIENT_REDIRECT,
 }, async (accessToken, refreshToken, profile, done) => {
+  let newUser;
 
-  console.log(profile);
+  const exists = await InstagramUser.findOne({ instagramID: profile.id });
 
-  // let newUser;
-
-  // const exists = await InstagramUser.findOne({ isntagramID: profile.id });
-
-  // if (exists) {
-  //   newUser = await InstagramUser.findOneAndUpdate({ isntagramID: profile.id }, {
-  //     isntagramID: profile.id,
-  //     username: profile.username,
-  //     displayName: profile.displayName,
-  //   })
-  // } else {
-  //   newUser = new InstagramUser({
-  //     isntagramID: profile.id,
-  //     displayName: profile.displayName,
-  //     username: profile.username,
-  //   })
-  //   await newUser.save();
-  // }
+  if (exists) {
+    newUser = await InstagramUser.findOneAndUpdate({ instagramID: profile.id }, {
+      instagramID: profile.id,
+      username: profile.username,
+      displayName: profile.displayName,
+    })
+  } else {
+    newUser = new InstagramUser({
+      instagramID: profile.id,
+      displayName: profile.displayName,
+      username: profile.username,
+    })
+    await newUser.save();
+  }
   return done(null, {...profile});
 }));
 
@@ -66,7 +63,7 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-router.get('/login', passport.authenticate('instagram'));
+router.get('/login', passport.authenticate('instagram', { scope: ["user_profile", "user_media"] }));
 
 router.get('/callback', passport.authenticate('instagram', {
   successRedirect: process.env.INSTAGRAM_FINAL_REDIRECT,
