@@ -16,7 +16,7 @@ const router = Router();
 
 //passport js implement
 router.use(session({ 
-  secret: process.env.FACEBOOK_SESSION_SECRET,
+  secret: process.env.PASSPORT_SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: new MemoryStore({

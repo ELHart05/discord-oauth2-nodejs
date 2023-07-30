@@ -3,8 +3,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
-const dotenvExpand = require('dotenv-expand');
 const { sign } = require("jsonwebtoken");
+const dotenvExpand = require('dotenv-expand');
 const env = require("dotenv");
 const myEnv = env.config();
 dotenvExpand.expand(myEnv);
@@ -13,10 +13,12 @@ dotenvExpand.expand(myEnv);
 const discordUserRoutes = require('./routes/DiscordUserRoutes');
 const telegramUserRoutes = require('./routes/TelegramUserRoutes');
 const facebookUserRoutes = require('./routes/FacebookUserRoutes');
+const twitterUserRoutes = require('./routes/TwitterUserRoutes');
+const instagramUserRoutes = require('./routes/InstagramUserRoutes');
 /*import middleware*/
 const handleError = require("./middlewares/handleError");
 //import telegram triggers
-const { triggerGroupId, triggerNewMember, triggerLeftMember } = require("./telegramBot");
+// const { triggerGroupId, triggerNewMember, triggerLeftMember } = require("./telegramBot");
 /*start the app instance*/
 const app = express();
 
@@ -30,7 +32,7 @@ app.use(cors({
 
 app.post('/auth/gettoken', (req, res) => {
     const { task } = req.body;
-    const token = sign({task}, process.env.JWT_SECRET_KEY, {expiresIn: "60000"})
+    const token = sign({task}, process.env.JWT_SECRET_KEY, {expiresIn: "1d"})
     res.status(200).send({token});
 })
 
@@ -38,6 +40,8 @@ app.post('/auth/gettoken', (req, res) => {
 app.use('/auth/facebook', facebookUserRoutes);
 app.use('/auth/telegram', telegramUserRoutes);
 app.use('/auth/discord', discordUserRoutes);
+app.use('/auth/twitter', twitterUserRoutes);
+app.use('/auth/instagram', instagramUserRoutes);
 app.use('*', (req, res) => res.send("Invalid Route"));
 
 /*connect to db and listen to requests*/
