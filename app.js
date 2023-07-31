@@ -14,7 +14,6 @@ const discordUserRoutes = require('./routes/DiscordUserRoutes');
 const telegramUserRoutes = require('./routes/TelegramUserRoutes');
 const facebookUserRoutes = require('./routes/FacebookUserRoutes');
 const twitterUserRoutes = require('./routes/TwitterUserRoutes');
-const instagramUserRoutes = require('./routes/InstagramUserRoutes');
 /*import middleware*/
 const handleError = require("./middlewares/handleError");
 //import telegram triggers
@@ -41,7 +40,6 @@ app.use('/auth/facebook', facebookUserRoutes);
 app.use('/auth/telegram', telegramUserRoutes);
 app.use('/auth/discord', discordUserRoutes);
 app.use('/auth/twitter', twitterUserRoutes);
-app.use('/auth/instagram', instagramUserRoutes);
 app.use('*', (req, res) => res.send("Invalid Route"));
 
 /*connect to db and listen to requests*/

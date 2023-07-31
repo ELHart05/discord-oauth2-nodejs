@@ -34,10 +34,8 @@
     "nodemon": "^2.0.22",
     "passport": "^0.6.0",
     "passport-facebook": "^3.0.0",
-    "passport-instagram": "^1.0.0",
     "passport-twitter": "^1.0.4",
     "request-promise": "^4.2.6",
-    "telegraf": "^4.12.2",
     "twitter": "^1.7.1"
   }
 }
