@@ -17,7 +17,7 @@ const twitterUserRoutes = require('./routes/TwitterUserRoutes');
 /*import middleware*/
 const handleError = require("./middlewares/handleError");
 //import telegram triggers
-// const { triggerGroupId, triggerNewMember, triggerLeftMember } = require("./telegramBot");
+const { triggerGroupId, triggerNewMember, triggerLeftMember } = require("./telegramBot");
 /*start the app instance*/
 const app = express();
 
@@ -31,7 +31,7 @@ app.use(cors({
 
 app.post('/auth/gettoken', (req, res) => {
     const { task } = req.body;
-    const token = sign({task}, process.env.JWT_SECRET_KEY, {expiresIn: "1d"})
+    const token = sign({task}, process.env.JWT_SECRET_KEY, {expiresIn: 60 * 1000 * 5})
     res.status(200).send({token});
 })
 

@@ -22,7 +22,7 @@ const twitterAuthMe = async (req, res, next) => {
       throw new AppError("Already took reward...", 400);
     }
 
-    res.status(200).send({id: twitterUser.twitterID})
+    res.status(200).send({ id: twitterUser.twitterID })
 
   } catch (err) {
     next(err);
@@ -36,14 +36,14 @@ const twitterAuthUpdateMe = async (req, res, next) => {
       throw new AppError("Authenticate with your account to verify...", 400);
     }
     
-    await TwitterUser.findOneAndUpdate({ twitterID: req.user.id }, {
+    await TwitterUser.findOneAndUpdate({ twitterID: req.user.twitterID }, {
       tookReward: true
     });
 
     res.status(204).end();
 
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
@@ -62,6 +62,6 @@ const twitterAuthUpdateMe = async (req, res, next) => {
 
 module.exports = {
   twitterAuthMe,
-  // twitterAuthAll,
-  twitterAuthUpdateMe
+  twitterAuthUpdateMe,
+  // twitterAuthAll
 }

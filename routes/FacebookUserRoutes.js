@@ -7,8 +7,8 @@ const FacebookUser = require("../models/FacebookUser");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const {
   facebookAuthMe,
-  // facebookAuthAll,
-  facebookAuthUpdateMe
+  facebookAuthUpdateMe,
+  // facebookAuthAll
 } = require("../controllers/FacebookUserController")
 require("dotenv").config();
 

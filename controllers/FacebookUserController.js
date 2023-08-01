@@ -36,7 +36,7 @@ const facebookAuthUpdateMe = async (req, res, next) => {
       throw new AppError("Authenticate with your account to verify...", 400);
     }
     
-    await FacebookUser.findOneAndUpdate({ facebookID: req.user.id }, {
+    await FacebookUser.findOneAndUpdate({ facebookID: req.user.facebookID }, {
       tookReward: true
     });
 
