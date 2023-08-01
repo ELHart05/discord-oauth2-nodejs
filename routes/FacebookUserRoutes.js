@@ -14,15 +14,17 @@ require("dotenv").config();
 
 const router = Router();
 
+let currentUser = ""; //local user to have the last user authed token
+
 //passport js implement
 router.use(session({ 
   secret: process.env.PASSPORT_SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  // store: new MemoryStore({
-  //   checkPeriod: 86400000 // prune expired entries every 24h
-  // }),
-  cookie: { maxAge: 5 * 60 * 1000 } 
+  store: new MemoryStore({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  }),
+  cookie: { maxAge: 5 * 60 * 1000 }
 })); //the user has only 5 minuites to verify before the session ends
 
 router.use(passport.initialize());
@@ -38,25 +40,23 @@ passport.use(new FacebookStrategy({
     page.id === "109776478271345" //this is EM facebook page id which is unique
   ))
 
-  let newUser;
-
   const exists = await FacebookUser.findOne({ facebookID: profile.id });
 
   if (exists) {
-    newUser = await FacebookUser.findOneAndUpdate({ facebookID: profile.id }, {
+    currentUser = await FacebookUser.findOneAndUpdate({ facebookID: profile.id }, {
       facebookID: profile.id,
       displayName: profile.displayName,
       likedEM
     })
   } else {
-    newUser = new FacebookUser({
+    currentUser = new FacebookUser({
       facebookID: profile.id,
       displayName: profile.displayName,
       likedEM
     })
-    await newUser.save();
+    await currentUser.save();
   }
-  return done(null, {...newUser._doc});
+  return done(null, currentUser);
 }));
 
 
