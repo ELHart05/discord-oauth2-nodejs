@@ -19,9 +19,9 @@ router.use(session({
   secret: process.env.PASSPORT_SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  store: new MemoryStore({
-    checkPeriod: 86400000 // prune expired entries every 24h
-  }),
+  // store: new MemoryStore({
+  //   checkPeriod: 86400000 // prune expired entries every 24h
+  // }),
   cookie: { maxAge: 5 * 60 * 1000 } 
 })); //the user has only 5 minuites to verify before the session ends
 
