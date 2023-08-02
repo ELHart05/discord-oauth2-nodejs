@@ -106,7 +106,7 @@ const discordAuthMe = async (req, res, next) => {
     try {
 
         if (!currentToken || currentToken === "Denied") {
-            throw new AppError("User not founded", 404);
+            throw new AppError("user_not_founded", 404);
         }
 
         
@@ -114,15 +114,15 @@ const discordAuthMe = async (req, res, next) => {
         currentUser = await DiscordUser.findOne({ discordID });
 
         if (!currentUser) {
-            throw new AppError("User not founded", 404);
+            throw new AppError("user_not_founded", 404);
         }
 
         if (currentUser.tookReward) {
-            throw new AppError("User already claimed reward", 400);
+            throw new AppError("already_took_reward", 400);
         }
 
         if (!currentUser.joinedEarthMeta) {
-            throw new AppError("User hasn't joined Earthmeta server yet...", 400);
+            throw new AppError("not_joined_em", 400);
         }
 
         res.status(200).send({ discordID });
@@ -138,7 +138,7 @@ const discordUpdateAuthMe = async (req, res, next) => {
     try {
         
         if (!currentUser) {
-            throw new AppError("User not found", 404);
+            throw new AppError("user_not_found", 404);
         }
 
         await DiscordUser.findOneAndUpdate({discordID: currentUser.discordID}, {

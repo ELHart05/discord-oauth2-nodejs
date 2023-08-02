@@ -5,21 +5,21 @@ const facebookAuthMe = (currentUser) => {
   return async (req, res, next) => {
   try {
     if (!currentUser) { 
-      throw new AppError("Authenticate with your account to verify...", 400);
+      throw new AppError("auth_account_error", 400);
     }
 
     const fbUser = await  FacebookUser.findOne({ facebookID: currentUser.facebookID });
 
     if (!fbUser) {
-      throw new AppError("User not found", 404);
+      throw new AppError("user_not_found", 404);
     }
 
     if (!fbUser.likedEM) {
-      throw new AppError("User didn't like EarthMeta page...", 400);
+      throw new AppError("not_liked_em", 400);
     }
 
     if (fbUser.tookReward) {
-      throw new AppError("Already took reward...", 400);
+      throw new AppError("already_took_reward", 400);
     }
     
     currentUser = "set-to-patch"
@@ -36,7 +36,7 @@ return async (req, res, next) => {
   try {
 
     if (currentUser !== "set-to-patch") { 
-      throw new AppError("Authenticate with your account to verify...", 400);
+      throw new AppError("auth_account_error", 400);
     }
     
     await FacebookUser.findOneAndUpdate({ facebookID: currentUser.facebookID }, {
