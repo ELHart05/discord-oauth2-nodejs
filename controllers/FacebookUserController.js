@@ -1,14 +1,14 @@
 const FacebookUser = require("../models/FacebookUser");
 const AppError = require("../utils/AppError");
 
-const facebookAuthMe = async (req, res, next) => {
+const facebookAuthMe = (currentUser) => {
+  return async (req, res, next) => {
   try {
-    
-    if (!req.isAuthenticated()) { 
+    if (!currentUser) { 
       throw new AppError("Authenticate with your account to verify...", 400);
     }
 
-    const fbUser = await FacebookUser.findOne({ facebookID: req.user.facebookID });
+    const fbUser = await  FacebookUser.findOne({ facebookID: currentUser.facebookID });
 
     if (!fbUser) {
       throw new AppError("User not found", 404);
@@ -21,32 +21,36 @@ const facebookAuthMe = async (req, res, next) => {
     if (fbUser.tookReward) {
       throw new AppError("Already took reward...", 400);
     }
+    
+    currentUser = "set-to-patch"
 
     res.status(200).send({id: fbUser.facebookID})
 
   } catch (err) {
     next(err);
   }
-}
+}}
 
-const facebookAuthUpdateMe = async (req, res, next) => {
+const facebookAuthUpdateMe = (currentUser) => {
+return async (req, res, next) => {
   try {
 
-    if (!req.isAuthenticated()) { 
+    if (currentUser !== "set-to-patch") { 
       throw new AppError("Authenticate with your account to verify...", 400);
     }
     
-    const result = await FacebookUser.findOneAndUpdate({ facebookID: req.user.facebookID }, {
+    await FacebookUser.findOneAndUpdate({ facebookID: currentUser.facebookID }, {
       tookReward: true
     });
 
-    // res.status(204).end();
-    res.send(result)
+    res.status(204).end();
 
   } catch (err) {
     next(err)
+  } finally {
+    currentUser = "";
   }
-}
+}}
 
 //test purpose only
 // const facebookAuthAll = async (req, res, next) => {

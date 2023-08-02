@@ -12,6 +12,8 @@ const {
 } = require("../controllers/TwitterUserController")
 require("dotenv").config();
 
+let currentUser = ""; //local user to have the last user authed
+
 const router = Router();
 
 //passport js implement
@@ -37,27 +39,25 @@ passport.use(new TwitterStrategy({
   //   'Authorization': `Bearer ${process.env.TWITTER_BEARER_TOKEN}`
   // }});
 
-  let newUser;
-
   const exists = await TwitterUser.findOne({ twitterID: profile.id });
 
   if (exists) {
-    newUser = await TwitterUser.findOneAndUpdate({ twitterID: profile.id }, {
+    currentUser = await TwitterUser.findOneAndUpdate({ twitterID: profile.id }, {
       twitterID: profile.id,
       username: profile.username,
       displayName: profile.displayName,
       // likedEM
     })
   } else {
-    newUser = new TwitterUser({
+    currentUser = new TwitterUser({
       twitterID: profile.id,
       displayName: profile.displayName,
       username: profile.username,
       // likedEM
     })
-    await newUser.save();
+    await currentUser.save();
   }
-  return done(null, {...newUser._doc});
+  return done(null, currentUser);
 }));
 
 
@@ -78,9 +78,55 @@ router.get('/callback', passport.authenticate('twitter', {
   failureRedirect: process.env.Twitter_FINAL_REDIRECT
 }));
 
-router.get('/me', twitterAuthMe);
+router.get('/me', async (req, res, next) => {
+  try {
+    
+    if (!currentUser) { 
+      throw new AppError("Authenticate with your account to verify...", 400);
+    }
 
-router.patch('/me', twitterAuthUpdateMe);
+    const twitterUser = await TwitterUser.findOne({ twitterID: req.user.twitterID });
+
+    if (!twitterUser) {
+      throw new AppError("User not found", 404);
+    }
+
+    if (!twitterUser.likedEM) {
+      throw new AppError("User didn't like EarthMeta page...", 400);
+    }
+
+    if (twitterUser.tookReward) {
+      throw new AppError("Already took reward...", 400);
+    }
+
+    currentUser = "set-to-patch"
+
+    res.status(200).send({ id: twitterUser.twitterID });
+
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/me', async (req, res, next) => {
+  try {
+
+    if (currentUser !== "set-to-patch") { 
+      throw new AppError("Authenticate with your account to verify...", 400);
+    }
+    
+    await TwitterUser.findOneAndUpdate({ twitterID: req.user.twitterID }, {
+      tookReward: true
+    });
+
+    res.status(204).end();
+
+  } catch (err) {
+    next(err);
+  } finally {
+    currentUser = "";
+  }
+});
 
 // router.get('/', twitterAuthAll);
 

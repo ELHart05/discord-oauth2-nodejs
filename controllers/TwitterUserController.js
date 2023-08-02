@@ -1,10 +1,11 @@
 const TwitterUser = require("../models/TwitterUser");
 const AppError = require("../utils/AppError");
 
-const twitterAuthMe = async (req, res, next) => {
+const twitterAuthMe = (currentUser) => {
+return async (req, res, next) => {
   try {
     
-    if (!req.isAuthenticated()) { 
+    if (!currentUser) { 
       throw new AppError("Authenticate with your account to verify...", 400);
     }
 
@@ -22,17 +23,20 @@ const twitterAuthMe = async (req, res, next) => {
       throw new AppError("Already took reward...", 400);
     }
 
-    res.status(200).send({ id: twitterUser.twitterID })
+    currentUser = "set-to-patch"
+
+    res.status(200).send({ id: twitterUser.twitterID });
 
   } catch (err) {
     next(err);
   }
-}
+}}
 
-const twitterAuthUpdateMe = async (req, res, next) => {
+const twitterAuthUpdateMe = (currentUser) => { 
+return async (req, res, next) => {
   try {
 
-    if (!req.isAuthenticated()) { 
+    if (currentUser !== "set-to-patch") { 
       throw new AppError("Authenticate with your account to verify...", 400);
     }
     
@@ -44,8 +48,10 @@ const twitterAuthUpdateMe = async (req, res, next) => {
 
   } catch (err) {
     next(err);
+  } finally {
+    currentUser = "";
   }
-}
+}}
 
 //test purpose only
 // const twitterAuthAll = async (req, res, next) => {

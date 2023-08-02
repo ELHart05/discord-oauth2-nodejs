@@ -9,12 +9,13 @@ const {
   facebookAuthMe,
   facebookAuthUpdateMe,
   // facebookAuthAll
-} = require("../controllers/FacebookUserController")
+} = require("../controllers/FacebookUserController");
+const AppError = require("../utils/AppError");
 require("dotenv").config();
 
 const router = Router();
 
-let currentUser = ""; //local user to have the last user authed token
+let currentUser = ""; //local user to have the last user authed
 
 //passport js implement
 router.use(session({ 
@@ -24,7 +25,9 @@ router.use(session({
   store: new MemoryStore({
     checkPeriod: 86400000 // prune expired entries every 24h
   }),
-  cookie: { maxAge: 5 * 60 * 1000 }
+  cookie: { 
+    maxAge: 5 * 60 * 1000
+  }
 })); //the user has only 5 minuites to verify before the session ends
 
 router.use(passport.initialize());
@@ -35,6 +38,7 @@ passport.use(new FacebookStrategy({
   clientSecret: process.env.FACEBOOK_APP_SECRET,
   callbackURL: process.env.FACEBOOK_CLIENT_REDIRECT
 }, async (accessToken, refreshToken, profile, done) => {
+
   const res = await axios.get(`http://graph.facebook.com/v17.0/${profile.id}/likes?access_token=${accessToken}`);
   let likedEM = res.data.data.some((page) => (
     page.id === "109776478271345" //this is EM facebook page id which is unique
@@ -54,7 +58,7 @@ passport.use(new FacebookStrategy({
       displayName: profile.displayName,
       likedEM
     })
-    await currentUser.save();
+  await currentUser.save();
   }
   return done(null, currentUser);
 }));
@@ -77,9 +81,54 @@ router.get('/callback', passport.authenticate('facebook', {
   failureRedirect: process.env.FACEBOOK_FINAL_REDIRECT
 }));
 
-router.get('/me', facebookAuthMe);
+router.get('/me', async (req, res, next) => {
+  try {
+    if (!currentUser) { 
+      throw new AppError("Authenticate with your account to verify...", 400);
+    }
 
-router.patch('/me', facebookAuthUpdateMe);
+    const fbUser = await  FacebookUser.findOne({ facebookID: currentUser.facebookID });
+
+    if (!fbUser) {
+      throw new AppError("User not found", 404);
+    }
+
+    if (!fbUser.likedEM) {
+      throw new AppError("User didn't like EarthMeta page...", 400);
+    }
+
+    if (fbUser.tookReward) {
+      throw new AppError("Already took reward...", 400);
+    }
+    
+    currentUser = "set-to-patch";
+
+    res.status(200).send({id: fbUser.facebookID})
+
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/me', async (req, res, next) => {
+  try {
+
+    if (currentUser !== "set-to-patch") { 
+      throw new AppError("Authenticate with your account to verify...", 400);
+    }
+    
+    await FacebookUser.findOneAndUpdate({ facebookID: currentUser.facebookID }, {
+      tookReward: true
+    });
+
+    res.status(204).end();
+
+  } catch (err) {
+    next(err)
+  } finally {
+    currentUser = "";
+  }
+});
 
 // router.get('/', facebookAuthAll);
 
