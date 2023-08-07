@@ -8,16 +8,23 @@ let currentToken = ""; //local var to have the last user authed token
 let currentUser = ""; //local user to have the last user authed token
 
 const discordAuthLogin = async (req, res) => {
-    const url = process.env.DISCORD_CLIENT_FIRST_CALLBACK;
+    const { type } = req.query;
+    let url = "";
+    if (type === "settings") {
+        url = process.env.DISCORD_CLIENT_FIRST_CALLBACK_SETTINGS;
+    } else if (!type) {
+        url = process.env.DISCORD_CLIENT_FIRST_CALLBACK;
+    } else {
+        url = (type) ? process.env.DISCORD_FINAL_REDIRECT_SETTINGS : process.env.DISCORD_FINAL_REDIRECT;
+    }
     res.redirect(url);
 } 
 
 const discordAuthCallback = async (req, res, next) => {
-    const { code, error } = req.query;
-
+    const { code, error, type } = req.query;
     try {
 
-        if (error) {
+        if (error || (type && type !== 'settings')) {
             //since cookie not working issue we will used local var to affect the cookie and the time we get to the front we get the local var contains token we decode it and fetch the user
             //note that I left the cookie in with the middleware commented in case of future maintainance
             res.cookie('token', "Denied");
@@ -25,7 +32,7 @@ const discordAuthCallback = async (req, res, next) => {
             res.redirect(`${process.env.DISCORD_FINAL_REDIRECT}`);
             return;
         }
-    
+
         let userData = {};
     
         const params = {
@@ -33,7 +40,7 @@ const discordAuthCallback = async (req, res, next) => {
             client_secret: process.env.DISCORD_CLIENT_SECRET,
             grant_type: 'authorization_code',
             code,
-            redirect_uri: process.env.DISCORD_CLIENT_REDIRECT
+            redirect_uri: (type) ? process.env.DISCORD_CLIENT_REDIRECT_SETTINGS : process.env.DISCORD_CLIENT_REDIRECT
         };
     
         const headers = {
@@ -94,7 +101,7 @@ const discordAuthCallback = async (req, res, next) => {
 
         currentToken = token;
 
-        res.redirect(`${process.env.DISCORD_FINAL_REDIRECT}`);
+        res.redirect((type) ? process.env.DISCORD_FINAL_REDIRECT_SETTINGS : process.env.DISCORD_FINAL_REDIRECT);
 
     } catch (error) {
         next(error);
@@ -103,29 +110,30 @@ const discordAuthCallback = async (req, res, next) => {
 
 
 const discordAuthMe = async (req, res, next) => {
+
     try {
+        const { type } = req.query;
 
-        if (!currentToken || currentToken === "Denied") {
-            throw new AppError("User not founded", 404);
+        if (!currentToken || currentToken === "Denied" || (type && type !== 'settings')) {
+            throw new AppError("user_not_founded", 404);
         }
-
         
         const { discordID } = await jwt.verify(currentToken, process.env.JWT_SECRET_KEY);
         currentUser = await DiscordUser.findOne({ discordID });
 
         if (!currentUser) {
-            throw new AppError("User not founded", 404);
+            throw new AppError("user_not_founded", 404);
         }
 
-        if (currentUser.tookReward) {
-            throw new AppError("User already claimed reward", 400);
+        if (currentUser.tookReward && !type) {
+            throw new AppError("already_took_reward", 400);
         }
 
-        if (!currentUser.joinedEarthMeta) {
-            throw new AppError("User hasn't joined Earthmeta server yet...", 400);
+        if (!currentUser.joinedEarthMeta && !type) {
+            throw new AppError("not_joined_em", 400);
         }
 
-        res.status(200).send({ discordID });
+        res.status(200).send({ discordID, username: currentUser.username });
 
         currentToken = "";
 
@@ -138,7 +146,7 @@ const discordUpdateAuthMe = async (req, res, next) => {
     try {
         
         if (!currentUser) {
-            throw new AppError("User not found", 404);
+            throw new AppError("user_not_found", 404);
         }
 
         await DiscordUser.findOneAndUpdate({discordID: currentUser.discordID}, {
