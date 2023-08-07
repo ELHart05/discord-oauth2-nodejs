@@ -114,6 +114,8 @@ const discordAuthMe = async (req, res, next) => {
     try {
         const { type, username } = req.query;
 
+        let discordID;
+
         if (username) {
             currentToken = "pass-next-check"; //this is used in case we want to verify a user without auth just with usernname, we garantee passing the currentToken barier
         }
@@ -123,10 +125,11 @@ const discordAuthMe = async (req, res, next) => {
         }
     
         if (!username) {
-            const { discordID } = await jwt.verify(currentToken, process.env.JWT_SECRET_KEY);
+            const JwtPayload = await jwt.verify(currentToken, process.env.JWT_SECRET_KEY);
+            discordID = JwtPayload.discordID;
         }
-        
-        currentUser = await DiscordUser.findOne({ username } || { discordID });
+
+        currentUser = await DiscordUser.findOne((username) ? { username } : { discordID });
 
         if (!currentUser) {
             throw new AppError("user_not_founded", 404);
@@ -140,7 +143,7 @@ const discordAuthMe = async (req, res, next) => {
             throw new AppError("not_joined_em", 400);
         }
 
-        res.status(200).send({ discordID, username });
+        res.status(200).send({ discordID: currentUser.discordID, username: currentUser.username });
 
         currentToken = "";
 
