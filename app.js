@@ -17,7 +17,7 @@ const twitterUserRoutes = require('./routes/TwitterUserRoutes');
 /*import middleware*/
 const handleError = require("./middlewares/handleError");
 //import telegram triggers
-// const { triggerGroupId, triggerNewMember, triggerLeftMember } = require("./telegramBot");
+const { triggerGroupId, triggerNewMember, triggerLeftMember } = require("./telegramBot");
 /*start the app instance*/
 const app = express();
 

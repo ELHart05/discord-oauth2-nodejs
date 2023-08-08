@@ -12,8 +12,8 @@ const TelegramUserSchema = new Schema({
     },
     username: {
         type: String,
-        required: true,
-        unique: true
+        required: false,
+        dafault: "undefined" //there's some users without username, if no username then undefined
     },
     tookReward: {
         type: Boolean,
@@ -23,7 +23,7 @@ const TelegramUserSchema = new Schema({
         type: Boolean,
         default: true
     }
-})
+}, { timestamps: true })
 
 const TelegramUser = mongoose.model('TelegramUsers', TelegramUserSchema);
 

@@ -120,7 +120,7 @@ const discordAuthMe = async (req, res, next) => {
             currentToken = "pass-next-check"; //this is used in case we want to verify a user without auth just with usernname, we garantee passing the currentToken barier
         }
 
-        if (!currentToken || currentToken === "Denied" || (type && type !== 'settings')) {
+        if (!currentToken || currentToken === "Denied" || (type && type !== 'settings') || typeof type !== "string") {
             throw new AppError("user_not_founded", 404);
         }
     

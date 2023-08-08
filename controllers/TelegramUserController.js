@@ -5,7 +5,9 @@ const getTelegramUser = async (req, res, next) => {
     try {
         const { username } = req.query;
 
-        if (username === undefined) {
+        console.log(typeof username);
+
+        if (username === undefined || typeof username !== "string") {
             throw new AppError("user_not_found", 404);
         }
 
@@ -13,6 +15,10 @@ const getTelegramUser = async (req, res, next) => {
         
         if (!result) {
             throw new AppError("user_not_found", 404);
+        }
+
+        if (result.username === "undefined") {
+            throw new AppError('Check your username please...', 400); //a lot of users don't define their username, which is essential
         }
 
         if (!result.joinedEM) {
@@ -34,7 +40,7 @@ const activateUserUsed = async (req, res, next) => {
     try {
         const { username } = req.query;
 
-        if (username === undefined) {
+        if (username === undefined || typeof username !== "string") {
             throw new AppError("user_not_found");
         } else {
             let result = await TelegramUser.findOneAndUpdate({username}, {
