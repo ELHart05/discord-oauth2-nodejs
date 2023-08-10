@@ -5,8 +5,6 @@ const getTelegramUser = async (req, res, next) => {
     try {
         const { username } = req.query;
 
-        console.log(typeof username);
-
         if (username === undefined || typeof username !== "string") {
             throw new AppError("user_not_found", 404);
         }
