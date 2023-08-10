@@ -135,7 +135,7 @@ const discordAuthMe = async (req, res, next) => {
             throw new AppError("user_not_founded", 404);
         }
 
-        if (currentUser.tookReward && !type) { //verifying from the /rewards page
+        if (currentUser.tookReward && !type && !username) { //verifying from the /rewards page
             throw new AppError("already_took_reward", 400);
         }
 
@@ -143,7 +143,7 @@ const discordAuthMe = async (req, res, next) => {
             throw new AppError("user_already_used", 400);
         }
 
-        if (!currentUser.joinedEarthMeta && !type) {
+        if (!currentUser.joinedEarthMeta && !type && !username) {
             throw new AppError("not_joined_em", 400);
         }
 
