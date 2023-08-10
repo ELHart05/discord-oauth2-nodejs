@@ -20,7 +20,7 @@ the main purpose of this service is to check users rewards, which means if they 
 - twitter users check
 
 the backend currently hosted in a render project here is the link: https://sem-5xoe.onrender.com
-note that the backend can be running slowley because it's using a freetrial only, the backend can take some time to work, don't panic.
+*Note that the backend can be running slowley because it's using a freetrial only, the backend can take some time to work, don't panic.
 
 # 1- Telegram (/auth/telegram)
 
